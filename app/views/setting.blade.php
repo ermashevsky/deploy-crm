@@ -30,7 +30,7 @@
     <ul class="nav navbar-nav">
 
         <li style="margin:10px;">
-            <button type="button" class="btn btn-info btn-sm" data-toggle="modal" id="redirectForm">
+            <button type="button" class="btn btn-default btn-sm" data-toggle="modal" id="redirectForm">
                 <i class="glyphicon glyphicon-plus-sign"> </i> Добавить CRM
             </button>
         </li>
@@ -58,24 +58,25 @@
                 <td>{{ $row->crmDomainName }} </td>
                 <td>{{ $row->activeCRMModules }} </td>
                 <td>{{ $row->crmVersion }} </td>
-                <td>{{ $row->created_at }}              </td>
+                <td>{{ $row->created_at }} </td>
                 <td>
-                    <button type="button" class="btn btn-info btn-sm" title="Инсталляция CRM" onclick="setupCRM({{$row->id}}); return false;">
-                        <i class="glyphicon glyphicon-play"> </i>
-                    </button>
+                    <div class="btn-group btn-group-sm" role="group" aria-label="">
+                        <button type="button" class="btn btn-default btn-sm" title="Инсталляция CRM" onclick="setupCRM({{$row->id}}); return false;">
+                            <i class="glyphicon glyphicon-play"> </i>
+                        </button>
 
-                    <button type="button" class="btn btn-info btn-sm" title="Редактировать параметры" onclick="editCRMParameters({{$row->id}}); return false;">
-                        <i class="glyphicon glyphicon-wrench"> </i>
-                    </button>
+                        <button type="button" class="btn btn-default btn-sm" title="Редактировать параметры" onclick="editCRMParameters({{$row->id}}); return false;">
+                            <i class="glyphicon glyphicon-wrench"> </i>
+                        </button>
 
-                    <button type="button" class="btn btn-info btn-sm" title="Апдейт версии CRM" onclick="updateCRMVersion({{$row->id}}); return false;">
-                        <i class="glyphicon glyphicon-hdd"> </i>
-                    </button>
+                        <button type="button" class="btn btn-default btn-sm" title="Апдейт версии CRM" onclick="updateCRMVersion({{$row->id}}); return false;">
+                            <i class="glyphicon glyphicon-hdd"> </i>
+                        </button>
 
-                    <button type="button" class="btn btn-danger btn-sm" title="Удалить CRM" onclick="deleteCRM({{$row->id}}); return false;">
-                        <i class="glyphicon glyphicon-trash"> </i>
-                    </button>
-
+                        <button type="button" class="btn btn-default btn-sm" title="Удалить CRM" onclick="deleteCRM({{$row->id}}); return false;">
+                            <i class="glyphicon glyphicon-trash"> </i>
+                        </button>
+                    </div>
                 </td>
             </tr>
             @endforeach

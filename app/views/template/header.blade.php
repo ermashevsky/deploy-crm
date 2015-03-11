@@ -16,6 +16,7 @@
         {{ HTML::script('js/jquery.bootstrap-growl.js') }}
         {{ HTML::script('js/jquery.steps.js') }}
         {{ HTML::script('js/jquery.validate.js') }}
+        {{ HTML::script('js/store.min.js') }}
         {{ HTML::style('css/bootstrap.css') }}
         {{ HTML::style('css/bootstrap-theme.css') }}
         {{ HTML::style('css/jquery.datetimepicker.css') }}
@@ -24,53 +25,11 @@
         {{ HTML::style('css/bootstrap-switch.css') }}
         {{ HTML::style('css/jquery.steps.css') }}
         {{ HTML::style('http://fonts.googleapis.com/css?family=Armata') }}
-        {{ HTML::style('http://fonts.googleapis.com/css?family=Roboto:300,400') }}
-
+        {{ HTML::style('http://fonts.googleapis.com/css?family=Ubuntu&subset=cyrillic-ext,latin') }}
 
 
         <script type="text/javascript">
             $(function () {
-                $("[name='my-checkbox']").bootstrapSwitch({
-                    size: 'normal',
-                    onColor: 'warning',
-                    offColor: 'danger'
-                });
-
-                var lastIdx = null;
-                var table = $('#tableData').DataTable();
-
-                $('#tableData tbody')
-                        .on('mouseover', 'td', function () {
-                            var colIdx = table.cell(this).index().column;
-
-                            if (colIdx !== lastIdx) {
-                                $(table.cells().nodes()).removeClass('highlight');
-                                $(table.column(colIdx).nodes()).addClass('highlight');
-                            }
-                        })
-                        .on('mouseleave', function () {
-                            $(table.cells().nodes()).removeClass('highlight');
-                        });
-
-                $('#start_date').datetimepicker({
-                    format: 'M d Y H:i:s',
-                    value: new Date().format('mmm d yyyy 00:00:00'),
-                    lang: 'ru',
-                    step: 5,
-                    closeOnDateSelect: true,
-                    todayButton: true,
-                    dayOfWeekStart: 1
-                });
-
-                $('#end_date').datetimepicker({
-                    format: 'M d Y H:i:s',
-                    value: new Date().format('mmm d yyyy HH:MM:ss'),
-                    lang: 'ru',
-                    step: 5,
-                    closeOnDateSelect: true,
-                    todayButton: true,
-                    dayOfWeekStart: 1
-                });
                 /* Set the defaults for DataTables initialisation */
                 $.extend(true, $.fn.dataTable.defaults, {
                     "sDom": "<'row'<'col-xs-6'l><'col-xs-6'f>r>t<'row'<'col-xs-6'i><'col-xs-6'p>>",
@@ -182,6 +141,147 @@
                         }
                     }
                 });
+
+                if (document.URL === "http://deploy.crm64.ru/manageCRM") {
+
+                    $('#crm_name').append(store.get('client_name'));
+
+                    if (!store.enabled) {
+
+                        $.bootstrapGrowl("Local storage is not supported by your browser. Please disable 'Private Mode', or upgrade to a modern browser.", {
+                            type: 'danger',
+                            align: 'center',
+                            width: 'auto',
+                            allow_dismiss: false
+                        });
+
+                        return;
+                    }
+
+                    $.post("/viewModuleList", {
+                        db: store.get('databaseName'),
+                        user: store.get('databaseUsername'),
+                        pass: store.get('databasePassword')
+                    }, function (data) {
+                        $('div#modulesList').append('<table class="table table-striped table-bordered table-condensed" id="tableModuleList"><thead><th>#</th><th>Наименование модуля</th><th>Описание</th><th>Действия</th></thead></table>');
+                        var n = 1;
+                        $.each(data, function (i, val) {
+                            $('#tableModuleList').append('<tr><td>' + n++ + '</td><td><label>' + data[i].plugin_name +
+                                    '</label></td><td>' + data[i].plugin_description +
+                                    '<p>Версия: ' + data[i].plugin_version +
+                                    ' | Автор: ' + data[i].plugin_author + '</p></td><td><input type="checkbox" id="' + data[i].id + '" name="my-checkbox"  ' + data[i].plugin_state + '></td></tr>');
+                        });
+
+
+                        $("[name='my-checkbox']").bootstrapSwitch({
+                            'onText': 'ВКЛ',
+                            'offText': 'ВЫКЛ'
+                        });
+                        $('input[name="my-checkbox"]').on('switchChange.bootstrapSwitch', function (event, state) {
+                            console.log(this); // DOM element
+                            console.log(event); // jQuery event
+                            console.log(state); // true | false
+
+                            //Тут отправить в php метод два параметра id записи и его текущее состояние, а в методе апдейт состояния
+                        });
+
+                    }, 'json');
+
+                }
+
+                //viewUserCRM CodeBlock start
+
+                if (document.URL === "http://deploy.crm64.ru/viewUserCRM") {
+
+                    $('#crm_name').append(store.get('client_name'));
+
+                    if (!store.enabled) {
+
+                        $.bootstrapGrowl("Local storage is not supported by your browser. Please disable 'Private Mode', or upgrade to a modern browser.", {
+                            type: 'danger',
+                            align: 'center',
+                            width: 'auto',
+                            allow_dismiss: false
+                        });
+
+                        return;
+                    }
+
+                    $.post("/viewUsersList", {
+                        db: store.get('databaseName'),
+                        user: store.get('databaseUsername'),
+                        pass: store.get('databasePassword')
+                    }, function (data) {
+                        $('div#modulesList').append('<table class="table table-striped table-bordered table-condensed" id="tableModuleList"><thead>\n\
+                    <th>#</th>\n\
+                    <th>ФИО</th>\n\
+                    <th>Должность</th>\n\
+                    <th>E-mail</th>\n\
+                    <th>Логин</th>\n\
+                    <th>Группа</th>\n\
+                    <th>Действия</th>\n\
+                    </thead></table>');
+                        var n = 1;
+                        $.each(data, function (i, val) {
+
+
+                            $('#tableModuleList').append('<tr><td>' + n++ + '</td><td><label>' + data[i].last_name + ' ' + data[i].first_name +
+                                    '</label></td><td>' + data[i].work_position + '</td><td>' + data[i].email + '</td><td>' +
+                                    data[i].username + '</td><td>' +
+                                    data[i].description + '</td><td><div class="btn-group btn-group-sm" role="group" aria-label="">\n\
+                        <button type="button" class="btn btn-default" onclick="viewUser(' + data[i].id + ')"><i class="glyphicon glyphicon-eye-open"></i></button>\n\
+                        <button type="button" class="btn btn-default" onclick="editUser(' + data[i].id + ')"><i class="glyphicon glyphicon-pencil"></i></button>\n\
+                        <button type="button" class="btn btn-default" onclick="deleteUser(' + data[i].id + ')"><i class="glyphicon glyphicon-trash"></i></button></div></td></tr>');
+                        });
+
+                    }, 'json');
+
+                }
+                //End of manageCRM CodeBlock
+
+
+                $("[name='my-checkbox']").bootstrapSwitch({
+                    size: 'normal',
+                    onColor: 'warning',
+                    offColor: 'danger'
+                });
+
+                var lastIdx = null;
+                var table = $('#tableData').DataTable();
+
+                $('#tableData tbody')
+                        .on('mouseover', 'td', function () {
+                            var colIdx = table.cell(this).index().column;
+
+                            if (colIdx !== lastIdx) {
+                                $(table.cells().nodes()).removeClass('highlight');
+                                $(table.column(colIdx).nodes()).addClass('highlight');
+                            }
+                        })
+                        .on('mouseleave', function () {
+                            $(table.cells().nodes()).removeClass('highlight');
+                        });
+
+                $('#start_date').datetimepicker({
+                    format: 'M d Y H:i:s',
+                    value: new Date().format('mmm d yyyy 00:00:00'),
+                    lang: 'ru',
+                    step: 5,
+                    closeOnDateSelect: true,
+                    todayButton: true,
+                    dayOfWeekStart: 1
+                });
+
+                $('#end_date').datetimepicker({
+                    format: 'M d Y H:i:s',
+                    value: new Date().format('mmm d yyyy HH:MM:ss'),
+                    lang: 'ru',
+                    step: 5,
+                    closeOnDateSelect: true,
+                    todayButton: true,
+                    dayOfWeekStart: 1
+                });
+
 
                 $('#redirectForm').click(function () {
 
@@ -323,19 +423,100 @@
 
             function createVHost(vhost, vhostDirectory) {
 
-//                return $.ajax({
-//                    url: "/createVhost/",
-//                    type: "POST",
-//                    data: {vhost:vhost, vhostDirectory: vhostDirectory},
-//                    async: false
-//                });
-
                 $.post("/createVhost", {vhost: vhost, vhostDirectory: vhostDirectory}, function (data) {
                     return data;
-                },'json');
+                }, 'json');
             }
 
 
+            function viewUser(id) {
+
+                var n = 1;
+
+                $.post('/getUserDetail', {
+                    id: id,
+                    db: store.get('databaseName'),
+                    user: store.get('databaseUsername'),
+                    pass: store.get('databasePassword')},
+                function (data) {
+                    console.info(data);
+                    $('#myModalViewUserDetailForm .modal-body table').empty();
+                    $.each(data, function (i, val) {
+                        $('#myModalViewUserDetailForm .modal-body table').append('<tr><td><label>ФИО</label></td><td>' + data[i].first_name + ' ' + data[i].last_name +
+                                '</td></tr><tr><td><label>Отдел</label></td><td>' + data[i].company +
+                                '</td></tr><tr><td><label>Должность</label></td><td>' + data[i].work_position +
+                                '</td></tr><tr><td><label>Телефон (внешн.)</label></td><td>' + data[i].external_phone +
+                                '</td></tr><tr><td><label>Телефон (внутр.)</label></td><td>' + data[i].phone +
+                                '</td></tr><tr><td><label>Email</label></td><td>' + data[i].email +
+                                '</td></tr><tr><td><label>Логин</label></td><td>' + data[i].username +
+                                '</td></tr><tr><td><label>Группа (роль)</label></td><td>' + data[i].description +
+                                '</td></tr>');
+                    });
+                    $('#myModalViewUserDetailForm').modal('show');
+                });
+
+            }
+
+            function editUser(id) {
+
+                var n = 1;
+
+                $.post('/getUserDetail', {
+                    id: id,
+                    db: store.get('databaseName'),
+                    user: store.get('databaseUsername'),
+                    pass: store.get('databasePassword')},
+                function (data) {
+                    console.info(data);
+                    
+                    $.each(data, function (i, val) {
+                        
+                        $('#myModalEditUserForm #inputLogin').val(data[i].username);
+                        $('#myModalEditUserForm #inputLastName').val(data[i].last_name);
+                        $('#myModalEditUserForm #inputFirstName').val(data[i].first_name);
+                        $('#myModalEditUserForm #inputWorkDept').val(data[i].company);
+                        $('#myModalEditUserForm #inputJobPosition').val(data[i].work_position);
+                        $('#myModalEditUserForm #inputExternalPhone').val(data[i].external_phone);
+                        $('#myModalEditUserForm #inputPhone').val(data[i].phone);
+                        $('#myModalEditUserForm #inputEmail').val(data[i].email);
+                        $('#myModalEditUserForm #inputLogin').val(data[i].description);
+
+                    });
+                    $('#myModalEditUserForm').modal('show');
+                });
+
+            }
+            
+            function deleteUser(id){
+                bootbox.dialog({
+                    message: "Вы хотите удалить пользователя?",
+                    title: "Удаление пользователя",
+                    buttons: {
+                        main: {
+                            label: "Да",
+                            className: "btn btn-default",
+                            callback: function () {
+                                $.post("/deleteUser", {
+                                    id: id,
+                                    db: store.get('databaseName'),
+                                    user: store.get('databaseUsername'),
+                                    pass: store.get('databasePassword')
+                                }, function (data) {
+                                    console.info(data);
+                                    location.reload();
+                                });
+                            }
+                        },
+                        danger: {
+                            label: "Нет",
+                            className: "btn btn-default",
+                            callback: function () {
+                                location.reload();
+                            }
+                        }
+                    }
+                });
+            }
 
             function setupCRM(id) {
 
@@ -369,10 +550,46 @@
                 }, 'json');
             }
 
+            function editCRMParameters(id) {
+                // Clear all keys
+                store.clear();
+
+                $.post("/getRowByPrimaryKey", {id: id}, function (data) {
+
+
+                    $.each(data, function (i, val) {
+
+                        store.set('activeCRMModules', data[i].activeCRMModules);
+                        store.set('asteriskAddress', data[i].asteriskAddress);
+                        store.set('asteriskLogin', data[i].asteriskLogin);
+                        store.set('asteriskPassword', data[i].asteriskPassword);
+                        store.set('client_name', data[i].client_name);
+                        store.set('created_at', data[i].created_at);
+                        store.set('crmDescription', data[i].crmDescription);
+                        store.set('crmDomainName', data[i].crmDomainName);
+                        store.set('crmLogin', data[i].crmLogin);
+                        store.set('crmPassword', data[i].crmPassword);
+                        store.set('crmVersion', data[i].crmVersion);
+                        store.set('databaseName', data[i].databaseName);
+                        store.set('databasePassword', data[i].databasePassword);
+                        store.set('databaseUsername', data[i].databaseUsername);
+                        store.set('id', data[i].id);
+                        store.set('updated_at', data[i].updated_at);
+
+                    });
+                    var delay = 100;
+                    setTimeout("document.location.href='http://deploy.crm64.ru/manageCRM'", delay);
+
+                }, 'json');
+
+
+            }
+
+
             function deleteRule(id) {
                 bootbox.dialog({
                     message: "Вы действительно хотите удалить CRM?",
-                    title: "Удаление правила",
+                    title: "Удаление CRM",
                     buttons: {
                         main: {
                             label: "Да",
@@ -398,12 +615,21 @@
         </script>
 
         <style>
+            body,html{
+                font-family: 'Ubuntu', sans-serif;
+                //font-size: 13px;
+            }
             .navbar-brand{
-                font-family: 'Armata', sans-serif;
+                font-family: 'Ubuntu', sans-serif;
             }
 
             #settingsTable{
-                font-family: 'Armata', sans-serif;
+                font-family: 'Ubuntu', sans-serif;
+                font-size: 13px;
+            }
+
+            #tableModuleList{
+                font-family: 'Ubuntu', sans-serif;
                 font-size: 13px;
             }
 

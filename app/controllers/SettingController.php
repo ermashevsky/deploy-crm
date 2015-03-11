@@ -8,6 +8,14 @@ class SettingController extends Controller {
         ));
     }
 
+    public function manageCRM() {
+        return View::make('manageCRM');
+    }
+    
+    public function viewUserCRM(){
+        return View::make('viewUserCRM');
+    }
+
     public function createCRMForm() {
         return View::make('addCRMForm');
     }
@@ -21,6 +29,155 @@ class SettingController extends Controller {
         $id = Input::all();
         $row = Setting::getRowByPrimaryKey($id);
         echo json_encode($row);
+    }
+
+    public function viewModuleList() {
+        $data = Input::all();
+
+        $user = $data['user'];
+        $pass = $data['pass'];
+        $db = $data['db'];
+
+        try {
+            $dbh = new PDO("mysql:host=localhost;dbname=$db", $user, $pass);
+            $dbh->exec("SET CHARACTER SET utf8");
+
+            $modules_array = array();
+
+            foreach ($dbh->query('SELECT * from system_plugins') as $row) {
+                $arr['id'] = $row['id'];
+                $arr['plugin_system_name'] = $row['plugin_system_name'];
+                $arr['plugin_name'] = $row['plugin_name'];
+                $arr['plugin_uri'] = $row['plugin_uri'];
+                $arr['plugin_version'] = $row['plugin_version'];
+                $arr['plugin_description'] = $row['plugin_description'];
+                $arr['plugin_author'] = $row['plugin_author'];
+                $arr['plugin_state'] = $row['plugin_state'];
+                $modules_array[$arr['id']] = $arr;
+            }
+            return $modules_array;
+            //$dbh = null;
+            // в случае ошибки SQL выражения выведем сообщене об ошибке
+            $error_array = $dbh->errorInfo();
+
+            if ($dbh->errorCode() !== 00000 && $error_array[2] !== "") {
+
+                return json_encode($error_array[2]);
+            }
+        } catch (PDOException $e) {
+            die("DB ERROR: " . $e->getMessage());
+        }
+    }
+
+    public function viewUsersList() {
+        $data = Input::all();
+
+        $user = $data['user'];
+        $pass = $data['pass'];
+        $db = $data['db'];
+
+        try {
+            $dbh = new PDO("mysql:host=localhost;dbname=$db", $user, $pass);
+            $dbh->exec("SET CHARACTER SET utf8");
+
+            $modules_array = array();
+
+            foreach ($dbh->query('SELECT users.id, users.last_name, users.first_name, users.company, users.work_position, users.phone, users.external_phone, users.email, users.username, users.created_on, users.last_login, groups.description from users inner join users_groups on users_groups.user_id =  users.id inner join groups on groups.id = users_groups.group_id') as $row) {
+                
+                $arr['id'] = $row['id'];
+                $arr['last_name'] = $row['last_name'];
+                $arr['first_name'] = $row['first_name'];
+                $arr['company'] = $row['company'];
+                $arr['work_position'] = $row['work_position'];
+                $arr['phone'] = $row['phone'];
+                $arr['external_phone'] = $row['external_phone'];
+                $arr['email'] = $row['email'];
+                $arr['username'] = $row['username'];
+                $arr['created_on'] = $row['created_on'];
+                $arr['last_login'] = $row['last_login'];
+                $arr['description'] = $row['description'];
+                $modules_array[$arr['id']] = $arr;
+            }
+            return $modules_array;
+            //$dbh = null;
+            // в случае ошибки SQL выражения выведем сообщене об ошибке
+            $error_array = $dbh->errorInfo();
+
+            if ($dbh->errorCode() !== 00000 && $error_array[2] !== "") {
+
+                return json_encode($error_array[2]);
+            }
+        } catch (PDOException $e) {
+            die("DB ERROR: " . $e->getMessage());
+        }
+    }
+    
+    public function deleteUser() {
+        $data = Input::all();
+        $id = $data['id'];
+        $user = $data['user'];
+        $pass = $data['pass'];
+        $db = $data['db'];
+
+        try {
+            $dbh = new PDO("mysql:host=localhost;dbname=$db", $user, $pass);
+            $dbh->exec("SET CHARACTER SET utf8");
+
+            $dbh->query('delete from `users` where `id`='.$id);
+
+            $error_array = $dbh->errorInfo();
+
+            if ($dbh->errorCode() !== 00000 && $error_array[2] !== "") {
+
+                return json_encode($error_array[2]);
+            }
+        
+        } catch (PDOException $e) {
+            die("DB ERROR: " . $e->getMessage());
+        }
+    }
+    
+    function getUserDetail(){
+        $data = Input::all();
+        $id = $data['id'];
+        $user = $data['user'];
+        $pass = $data['pass'];
+        $db = $data['db'];
+
+        try {
+            $dbh = new PDO("mysql:host=localhost;dbname=$db", $user, $pass);
+            $dbh->exec("SET CHARACTER SET utf8");
+
+            $modules_array = array();
+
+            foreach ($dbh->query('SELECT users.id, users.last_name, users.first_name, users.company, users.work_position, users.phone, users.external_phone, users.email, users.username, users.created_on, users.last_login, groups.description from users inner join users_groups on users_groups.user_id =  users.id inner join groups on groups.id = users_groups.group_id where `users`.`id` = '.$id) as $row) {
+                
+                $arr['id'] = $row['id'];
+                $arr['last_name'] = $row['last_name'];
+                $arr['first_name'] = $row['first_name'];
+                $arr['company'] = $row['company'];
+                $arr['work_position'] = $row['work_position'];
+                $arr['phone'] = $row['phone'];
+                $arr['external_phone'] = $row['external_phone'];
+                $arr['email'] = $row['email'];
+                $arr['username'] = $row['username'];
+                $arr['created_on'] = $row['created_on'];
+                $arr['last_login'] = $row['last_login'];
+                $arr['description'] = $row['description'];
+                $modules_array[$arr['id']] = $arr;
+            }
+            return $modules_array;
+            //$dbh = null;
+            // в случае ошибки SQL выражения выведем сообщене об ошибке
+            $error_array = $dbh->errorInfo();
+
+            if ($dbh->errorCode() !== 00000 && $error_array[2] !== "") {
+
+                return json_encode($error_array[2]);
+            }
+        } catch (PDOException $e) {
+            die("DB ERROR: " . $e->getMessage());
+        }
     }
 
     public function createCRMDB() {
@@ -195,11 +352,10 @@ class SettingController extends Controller {
 
         $host = $data['vhost'];
         $directory = $data['vhostDirectory'];
-        
-        $result = exec('sudo /home/denic/server/deploy.crm64.ru/scripts/addvhost.sh -u '.$host.' -d '.$directory);
-        
+
+        $result = exec('sudo /home/denic/server/deploy.crm64.ru/scripts/addvhost.sh -u ' . $host . ' -d ' . $directory);
+
         echo json_encode($result);
-        
     }
 
 }

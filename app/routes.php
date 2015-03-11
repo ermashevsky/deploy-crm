@@ -13,9 +13,15 @@
 
 Route::get('/', "SettingController@index");
 Route::get('/createCRM', "SettingController@createCRMForm");
+Route::get('/manageCRM', "SettingController@manageCRM");
+Route::get('/viewUserCRM', "SettingController@viewUserCRM");
 Route::post('/createCRMDB', "SettingController@createCRMDB");
 Route::post('/saveNewCRMData', 'SettingController@createNewRow');
 Route::post('/getRowByPrimaryKey', 'SettingController@getRowByPrimaryKey');
 Route::post('/createVhost', 'SettingController@createVhostEnvironment');
+Route::post('/viewModuleList', "SettingController@viewModuleList");
+Route::post('/viewUsersList', "SettingController@viewUsersList");
+Route::post('/getUserDetail', "SettingController@getUserDetail");
+Route::post('/deleteUser', "SettingController@deleteUser");
 
 
