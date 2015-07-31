@@ -21,7 +21,7 @@
         <div class="col-xs-12 col-md-10">
             <div id="modulesList" style="width: 90%;">
                 <div class="page-header">
-                    <h4><i class="glyphicon glyphicon-user"></i> Список пользователей</h4>
+                    <h4><i class="glyphicon glyphicon-user"></i> Список пользователей CRM</h4>
                 </div>
                 <p>
                     <button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#myModalAddUserForm">
@@ -35,7 +35,7 @@
                 <li><a href="/"><i class="glyphicon glyphicon-home"> </i> Главная</a></li>
                 <li><a href="/manageCRM"><i class="glyphicon glyphicon-gift"> </i> Список модулей</a></li>
                 <li><a href="/viewUserCRM"><i class="glyphicon glyphicon-user"> </i> Пользователи системы</a></li>
-                <li><a href="#"><i class="glyphicon glyphicon-cog"> </i> Asterisk Listner</a></li>
+                <li><a href="/viewAsteriskSettings"><i class="glyphicon glyphicon-cog"> </i> Asterisk Listner</a></li>
             </ul>
         </div>
     </div>
@@ -48,80 +48,80 @@
                     <h4 class="modal-title" id="myModalLabel"><i class="glyphicon glyphicon-user"> </i> Новый пользователь</h4>
                 </div>
                 <div class="modal-body">
-                    <form class="form-horizontal">
+                    <form class="form-horizontal" id="newUserForm">
                         <div class="form-group">
                             <label for="inputLogin" class="control-label col-xs-2">Логин</label>
                             <div class="col-xs-10">
-                                <input type="text" class="form-control" id="inputLogin" placeholder="Введите логин">
+                                <input type="text" class="form-control" id="inputLogin" name="inputLogin" placeholder="Введите логин">
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="inputLastName" class="control-label col-xs-2">Фамилия</label>
                             <div class="col-xs-10">
-                                <input type="text" class="form-control" id="inputLastName" placeholder="Введите фамилию">
+                                <input type="text" class="form-control" id="inputLastName" name="inputLastName" placeholder="Введите фамилию">
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="inputFirstName" class="control-label col-xs-2">Имя</label>
                             <div class="col-xs-10">
-                                <input type="text" class="form-control" id="inputFirstName" placeholder="Введите имя">
+                                <input type="text" class="form-control" id="inputFirstName" name="inputFirstName" placeholder="Введите имя">
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="inputJobPosition" class="control-label col-xs-2">Должность</label>
                             <div class="col-xs-10">
-                                <input type="text" class="form-control" id="inputJobPosition" placeholder="Введите должность">
+                                <input type="text" class="form-control" id="inputJobPosition" name="inputJobPosition" placeholder="Введите должность">
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="inputWorkDept" class="control-label col-xs-2">Отдел</label>
                             <div class="col-xs-10">
-                                <input type="text" class="form-control" id="inputWorkDept" placeholder="Введите название отдела">
+                                <input type="text" class="form-control" id="inputWorkDept" name="inputWorkDept" placeholder="Введите название отдела">
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="inputEmail" class="control-label col-xs-2">Email</label>
                             <div class="col-xs-10">
-                                <input type="email" class="form-control" id="inputEmail" placeholder="Email">
+                                <input type="email" class="form-control" id="inputEmail" name="inputEmail" placeholder="Email">
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="inputPhone" class="control-label col-xs-2">Телефон (внутр.)</label>
                             <div class="col-xs-10">
-                                <input type="text" class="form-control" id="inputPhone" placeholder="Введите номер телефона">
+                                <input type="text" class="form-control" id="inputPhone" name="inputPhone" placeholder="Введите номер телефона">
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="inputExternalPhone" class="control-label col-xs-2">Телефон (внешн.)</label>
                             <div class="col-xs-10">
-                                <input type="text" class="form-control" id="inputExternalPhone" placeholder="Введите внешний номер телефона">
+                                <input type="text" class="form-control" id="inputExternalPhone" name="inputExternalPhone" placeholder="Введите внешний номер телефона">
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="inputRole" class="control-label col-xs-2">Группа (Роль)</label>
                             <div class="col-xs-10">
                                 <select id="inputRole" name="group" class="form-control">
-                                    <option>Менеджер</option>
-                                    <option>Администратор</option>
+                                    <option value="members">Менеджер</option>
+                                    <option value="admin">Администратор</option>
                                 </select>
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="inputPassword" class="control-label col-xs-2">Пароль</label>
                             <div class="col-xs-10">
-                                <input type="password" class="form-control" id="inputPassword" placeholder="Введите пароль">
+                                <input type="password" class="form-control" id="inputPassword" name="inputPassword" placeholder="Введите пароль">
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="inputPasswordConfirm" class="control-label col-xs-2">Повтор пароля</label>
                             <div class="col-xs-10">
-                                <input type="password" class="form-control" id="inputPasswordConfirm" placeholder="Повторите пароль">
+                                <input type="password" class="form-control" id="inputPasswordConfirm" name="inputPasswordConfirm" placeholder="Повторите пароль">
                             </div>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default">Сохранить</button>
+                    <button type="button" class="btn btn-default" onclick="saveNewUser(); return false;">Сохранить</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>
                 </div>
             </div>
@@ -157,80 +157,69 @@
                     <h4 class="modal-title" id="myModalLabel"><i class="glyphicon glyphicon-user"> </i> Редактирование данных пользователя</h4>
                 </div>
                 <div class="modal-body">
-                    <form class="form-horizontal">
+                    <form class="form-horizontal" id="editUserDetailForm">
+                        <input type="hidden" name="inputHiddenId" id="inputHiddenId">
                         <div class="form-group">
                             <label for="inputLogin" class="control-label col-xs-2">Логин</label>
                             <div class="col-xs-10">
-                                <input type="text" class="form-control" id="inputLogin" placeholder="Введите логин">
+                                <input type="text" class="form-control" id="inputLogin" name="inputlogin" placeholder="Введите логин">
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="inputLastName" class="control-label col-xs-2">Фамилия</label>
                             <div class="col-xs-10">
-                                <input type="text" class="form-control" id="inputLastName" placeholder="Введите фамилию">
+                                <input type="text" class="form-control" id="inputLastName" name="inputLastName" placeholder="Введите фамилию">
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="inputFirstName" class="control-label col-xs-2">Имя</label>
                             <div class="col-xs-10">
-                                <input type="text" class="form-control" id="inputFirstName" placeholder="Введите имя">
+                                <input type="text" class="form-control" id="inputFirstName" name="inputFirstName" placeholder="Введите имя">
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="inputJobPosition" class="control-label col-xs-2">Должность</label>
                             <div class="col-xs-10">
-                                <input type="text" class="form-control" id="inputJobPosition" placeholder="Введите должность">
+                                <input type="text" class="form-control" id="inputJobPosition" name="inputJobPosition" placeholder="Введите должность">
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="inputWorkDept" class="control-label col-xs-2">Отдел</label>
                             <div class="col-xs-10">
-                                <input type="text" class="form-control" id="inputWorkDept" placeholder="Введите название отдела">
+                                <input type="text" class="form-control" id="inputWorkDept" name="inputWorkDept" placeholder="Введите название отдела">
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="inputEmail" class="control-label col-xs-2">Email</label>
                             <div class="col-xs-10">
-                                <input type="email" class="form-control" id="inputEmail" placeholder="Email">
+                                <input type="email" class="form-control" id="inputEmail" name="inputEmail" placeholder="Email">
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="inputPhone" class="control-label col-xs-2">Телефон (внутр.)</label>
                             <div class="col-xs-10">
-                                <input type="text" class="form-control" id="inputPhone" placeholder="Введите номер телефона">
+                                <input type="text" class="form-control" id="inputPhone" name="inputPhone" placeholder="Введите номер телефона">
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="inputExternalPhone" class="control-label col-xs-2">Телефон (внешн.)</label>
                             <div class="col-xs-10">
-                                <input type="text" class="form-control" id="inputExternalPhone" placeholder="Введите внешний номер телефона">
+                                <input type="text" class="form-control" id="inputExternalPhone" name="inputExternalPhone" placeholder="Введите внешний номер телефона">
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="inputRole" class="control-label col-xs-2">Группа (Роль)</label>
                             <div class="col-xs-10">
-                                <select id="inputRole" name="group" class="form-control">
+                                <select id="inputRole" name="inputRole" class="form-control">
                                     <option>Менеджер</option>
                                     <option>Администратор</option>
                                 </select>
                             </div>
                         </div>
-                        <!--                        <div class="form-group">
-                                                    <label for="inputPassword" class="control-label col-xs-2">Пароль</label>
-                                                    <div class="col-xs-10">
-                                                        <input type="password" class="form-control" id="inputPassword" placeholder="Введите пароль">
-                                                    </div>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="inputPasswordConfirm" class="control-label col-xs-2">Повтор пароля</label>
-                                                    <div class="col-xs-10">
-                                                        <input type="password" class="form-control" id="inputPasswordConfirm" placeholder="Повторите пароль">
-                                                    </div>
-                                                </div>-->
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default">Сохранить</button>
+                    <button type="button" class="btn btn-default" onclick="updateUserDetails(); return false;">Сохранить</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>
                 </div>
             </div>

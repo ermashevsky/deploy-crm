@@ -85,9 +85,14 @@
         <h3>Параметры Asterisk</h3>
         <fieldset>
             <legend>Параметры Asterisk</legend>
+            <input id="httpPort" name="httpPort" type="hidden">
             <p>
                 <label for="asteriskAddress">IP-адрес Asterisk *</label>
                 <input id="asteriskAddress" name="asteriskAddress" type="text" class="required">
+            </p>
+            <p>
+                <label for="asteriskPort">Порт Asterisk *</label>
+                <input id="asteriskPort" name="asteriskPort" type="text" class="required">
             </p>
             <p>
                 <label for="asteriskLogin">Пользователь Asterisk *</label>
@@ -101,7 +106,7 @@
                 <label for="confirmAsteriskPassword">Подтверждение пароля Asterisk *</label>
                 <input id="confirmAsteriskPassword" name="confirmAsteriskPassword" type="password" class="required">
             </p>
-            <br/>
+             <br/>
             <p>(*) Обязательный параметр</p>
         </fieldset>
 

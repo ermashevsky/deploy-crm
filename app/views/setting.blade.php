@@ -61,21 +61,48 @@
                 <td>{{ $row->created_at }} </td>
                 <td>
                     <div class="btn-group btn-group-sm" role="group" aria-label="">
-                        <button type="button" class="btn btn-default btn-sm" title="Инсталляция CRM" onclick="setupCRM({{$row->id}}); return false;">
-                            <i class="glyphicon glyphicon-play"> </i>
-                        </button>
+                        <?php
+                        if (SettingController::checkInstallationCRM($row->crmDomainName) == TRUE) {
+                            ?>    
 
-                        <button type="button" class="btn btn-default btn-sm" title="Редактировать параметры" onclick="editCRMParameters({{$row->id}}); return false;">
-                            <i class="glyphicon glyphicon-wrench"> </i>
-                        </button>
+                            <button type="button" class="btn btn-default btn-sm" title="Инсталляция CRM" onclick="setupCRM({{$row->id}}); return false;" disabled>
+                                <i class="glyphicon glyphicon-play"> </i>
+                            </button>
 
-                        <button type="button" class="btn btn-default btn-sm" title="Апдейт версии CRM" onclick="updateCRMVersion({{$row->id}}); return false;">
-                            <i class="glyphicon glyphicon-hdd"> </i>
-                        </button>
+                            <button type="button" class="btn btn-default btn-sm" title="Редактировать параметры" onclick="editCRMParameters({{$row->id}}); return false;">
+                                <i class="glyphicon glyphicon-wrench"> </i>
+                            </button>
 
-                        <button type="button" class="btn btn-default btn-sm" title="Удалить CRM" onclick="deleteCRM({{$row->id}}); return false;">
-                            <i class="glyphicon glyphicon-trash"> </i>
-                        </button>
+                            <button type="button" class="btn btn-default btn-sm" title="Апдейт версии CRM" onclick="updateCRMVersion({{$row->id}}); return false;">
+                                <i class="glyphicon glyphicon-hdd"> </i>
+                            </button>
+
+                            <button type="button" class="btn btn-default btn-sm" title="Удалить CRM" onclick="deleteCRM({{$row->id}}); return false;">
+                                <i class="glyphicon glyphicon-trash"> </i>
+                            </button>
+
+                            <?php
+                        } else {
+                            ?>
+
+                            <button type="button" class="btn btn-default btn-sm" title="Инсталляция CRM" onclick="setupCRM({{$row->id}}); return false;" >
+                                <i class="glyphicon glyphicon-play"> </i>
+                            </button>
+
+                            <button type="button" class="btn btn-default btn-sm" title="Редактировать параметры" onclick="editCRMParameters({{$row->id}}); return false;" disabled>
+                                <i class="glyphicon glyphicon-wrench"> </i>
+                            </button>
+
+                            <button type="button" class="btn btn-default btn-sm" title="Апдейт версии CRM" onclick="updateCRMVersion({{$row->id}}); return false;" disabled>
+                                <i class="glyphicon glyphicon-hdd"> </i>
+                            </button>
+
+                            <button type="button" class="btn btn-default btn-sm" title="Удалить CRM" onclick="deleteCRM({{$row->id}}); return false;" disabled>
+                                <i class="glyphicon glyphicon-trash"> </i>
+                            </button>
+                            <?php
+                        }
+                        ?>
                     </div>
                 </td>
             </tr>

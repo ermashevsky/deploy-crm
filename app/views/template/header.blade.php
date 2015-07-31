@@ -30,6 +30,7 @@
 
         <script type="text/javascript">
             $(function () {
+
                 /* Set the defaults for DataTables initialisation */
                 $.extend(true, $.fn.dataTable.defaults, {
                     "sDom": "<'row'<'col-xs-6'l><'col-xs-6'f>r>t<'row'<'col-xs-6'i><'col-xs-6'p>>",
@@ -142,7 +143,7 @@
                     }
                 });
 
-                if (document.URL === "http://deploy.crm64.ru/manageCRM") {
+                if (document.URL === "http://deploy.crm64.ru:8080/manageCRM") {
 
                     $('#crm_name').append(store.get('client_name'));
 
@@ -163,15 +164,28 @@
                         user: store.get('databaseUsername'),
                         pass: store.get('databasePassword')
                     }, function (data) {
-                        $('div#modulesList').append('<table class="table table-striped table-bordered table-condensed" id="tableModuleList"><thead><th>#</th><th>Наименование модуля</th><th>Описание</th><th>Действия</th></thead></table>');
+                        $('div#modulesList div#sectionA').append('<table class="table table-striped table-bordered table-condensed" id="tableModuleList"><thead><th>#</th><th>Наименование модуля</th><th>Описание</th><th>Действия</th></thead></table>');
                         var n = 1;
                         $.each(data, function (i, val) {
-                            $('#tableModuleList').append('<tr><td>' + n++ + '</td><td><label>' + data[i].plugin_name +
-                                    '</label></td><td>' + data[i].plugin_description +
-                                    '<p>Версия: ' + data[i].plugin_version +
-                                    ' | Автор: ' + data[i].plugin_author + '</p></td><td><input type="checkbox" id="' + data[i].id + '" name="my-checkbox"  ' + data[i].plugin_state + '></td></tr>');
-                        });
+                            if (data[i].plugin_type === 'system') {
+                                $('#tableModuleList').append('<tr><td>' + n++ + '</td><td><label>' + data[i].plugin_name +
+                                        '</label></td><td>' + data[i].plugin_description +
+                                        '<p>Версия: ' + data[i].plugin_version + ' <span id="' + data[i].plugin_system_name + '"></span> <span id="' + data[i].plugin_system_name + '_update"></span> ' +
+                                        ' | Автор: ' + data[i].plugin_author + '</p></td><td style="vertical-align:middle;"><span class="label label-primary">Системный модуль</span></td></tr>');
+                                checkModuleVersion(data[i].plugin_version, data[i].plugin_system_name);
+                            } else {
+                                $('#tableModuleList').append('<tr><td>' + n++ + '</td><td><label>' + data[i].plugin_name +
+                                        '</label></td><td>' + data[i].plugin_description +
+                                        '<p>Версия: ' + data[i].plugin_version + ' <span id="' + data[i].plugin_system_name + '"></span>' +
+                                        ' | Автор: ' + data[i].plugin_author + '</p></td><td><input type="checkbox" id="' + data[i].id +
+                                        '" name="my-checkbox"  ' + data[i].plugin_state + '></td></tr>');
 
+                                checkModuleVersion(data[i].plugin_version, data[i].plugin_system_name);
+                            }
+
+                        });
+                        console.info(n - 1);
+                        $('span#counter_installed').append(n - 1);
 
                         $("[name='my-checkbox']").bootstrapSwitch({
                             'onText': 'ВКЛ',
@@ -182,7 +196,78 @@
                             console.log(event); // jQuery event
                             console.log(state); // true | false
 
-                            //Тут отправить в php метод два параметра id записи и его текущее состояние, а в методе апдейт состояния
+                            var id = this.getAttribute('id');
+                            var checkbox_state = state;
+
+                            $.post("/checkBoxTrigger", {
+                                db: store.get('databaseName'),
+                                user: store.get('databaseUsername'),
+                                pass: store.get('databasePassword'),
+                                id: id, checkbox_state: checkbox_state
+                            }, function (data) {
+                                //location.reload();
+                            });
+
+                        });
+
+                    }, 'json');
+
+                    //Не установленные модули
+
+                    $.post("/getNotInstalledModules", {
+                        db: store.get('databaseName'),
+                        user: store.get('databaseUsername'),
+                        pass: store.get('databasePassword')
+                    }, function (data) {
+                        console.info(data);
+                        $('div#modulesList div#sectionB').append('<table class="table table-striped table-bordered table-condensed" id="tableNotInstalledModuleList"><thead><th>#</th><th>Наименование модуля</th><th>Описание</th><th>Действия</th></thead></table>');
+                        var n = 1;
+                        var m = 1;
+                        $.each(data, function (i, val) {
+
+                            $('#tableNotInstalledModuleList').append('<tr><td>' + n++ + '</td><td><label>' + data[i].plugin_name +
+                                    '</label></td><td>' + data[i].plugin_description +
+                                    '<p>Версия: ' + data[i].plugin_version +
+                                    ' | Автор: ' + data[i].plugin_author + '</p></td><td><input type="checkbox" id="' + i + '" name="my-checkbox2" ></td></tr>');
+
+                        });
+
+                        $('span#counter_not_installed').append(n - 1);
+
+                        $("[name='my-checkbox2']").bootstrapSwitch({
+                            'onText': 'ВКЛ',
+                            'offText': 'ВЫКЛ'
+                        });
+
+                        $('[name="my-checkbox2"]').on('switchChange.bootstrapSwitch', function (event, state) {
+                            console.log(this); // DOM element
+                            console.log(event); // jQuery event
+                            console.log(state); // true | false
+
+                            var id = this.getAttribute('id');
+                            var checkbox_state = state;
+
+                            $.post("/installModule", {
+                                db: store.get('databaseName'),
+                                user: store.get('databaseUsername'),
+                                pass: store.get('databasePassword'),
+                                plugin_system_name: data[id].plugin_system_name,
+                                plugin_menu_visible: data[id].plugin_menu_visible,
+                                plugin_menu_name: data[id].plugin_menu_name,
+                                plugin_menu_item_order: data[id].plugin_menu_item_order,
+                                plugin_name: data[id].plugin_name,
+                                plugin_uri: data[id].plugin_uri,
+                                plugin_version: data[id].plugin_version,
+                                plugin_description: data[id].plugin_description,
+                                plugin_author: data[id].plugin_author,
+                                plugin_state: data[id].plugin_state,
+                                plugin_type: data[id].plugin_type
+
+                            }, function (data) {
+                                console.info(data);
+                                location.reload();
+                            });
+
                         });
 
                     }, 'json');
@@ -191,7 +276,7 @@
 
                 //viewUserCRM CodeBlock start
 
-                if (document.URL === "http://deploy.crm64.ru/viewUserCRM") {
+                if (document.URL === "http://deploy.crm64.ru:8080/viewUserCRM") {
 
                     $('#crm_name').append(store.get('client_name'));
 
@@ -239,6 +324,70 @@
                 }
                 //End of manageCRM CodeBlock
 
+                if (document.URL === "http://deploy.crm64.ru:8080/viewAsteriskSettings") {
+
+                    $('#crm_name').append(store.get('client_name'));
+
+                    if (!store.enabled) {
+
+                        $.bootstrapGrowl("Local storage is not supported by your browser. Please disable 'Private Mode', or upgrade to a modern browser.", {
+                            type: 'danger',
+                            align: 'center',
+                            width: 'auto',
+                            allow_dismiss: false
+                        });
+
+                        return;
+                    }
+
+                    $.post("/getAsteriskSettings", {
+                        db: store.get('databaseName'),
+                        user: store.get('databaseUsername'),
+                        pass: store.get('databasePassword')
+                    }, function (data) {
+
+                        if ($.isEmptyObject(data)) {
+
+                            $('#addAsteriskSettings').prop('disabled', false);
+                            $('#editAsteriskSettings').prop('disabled', true);
+                            $('#deleteAsteriskSettings').prop('disabled', true);
+                        } else {
+                            $('#addAsteriskSettings').prop('disabled', true);
+                            $('div#modulesList').append('<table class="table table-striped table-bordered table-condensed" id="tableModuleList"></table>');
+                            $.each(data, function (i, val) {
+
+                                $('#tableModuleList').append('<tr><td><label>Asterisk Host</label></td><td>' + data[i].asteriskHost + '</td></tr>\n\
+                            <tr><td><label>Asterisk Port</label></td><td>' + data[i].asteriskPort + '</td></tr>\n\
+                                <tr><td><label>Asterisk Username</label></td><td>' + data[i].asteriskUsername + '</td></tr>\n\
+                                    <tr><td><label>Asterisk Password</label></td><td>' + data[i].asteriskPassword + '</td></tr>\n\
+                                        <tr><td><label>Database Host</label></td><td>' + data[i].databaseHost + '</td></tr>\n\
+                                            <tr><td><label>Database Username</label></td><td>' + data[i].databaseUsername + '</td></tr>\n\
+                                                <tr><td><label>Database Password</label></td><td>' + data[i].databasePassword + '</td></tr>\n\
+                                                    <tr><td><label>Database Name</label></td><td>' + data[i].databaseName + '</td></tr>\n\
+                                                        <tr><td><label>HTTP Listner Port</label></td><td>' + data[i].httpServerListenPort + '</td></tr>\n\
+                            ');
+
+
+                                $('#idHidden').val(data[i].id);
+                                $('#crmDomainNameInput').val(store.get('crmDomainName'));
+                                $('#asteriskHost').val(data[i].asteriskHost);
+                                $('#asteriskPort').val(data[i].asteriskPort);
+                                $('#asteriskUsername').val(data[i].asteriskUsername);
+                                $('#asteriskPassword').val(data[i].asteriskPassword);
+                                $('#dbHost').val(data[i].databaseHost);
+                                $('#dbUsername').val(data[i].databaseUsername);
+                                $('#dbPassword').val(data[i].databasePassword);
+                                $('#dbName').val(data[i].databaseName);
+                                $('#httpPort').val(data[i].httpServerListenPort);
+
+
+
+                            });
+                        }
+
+                    }, 'json');
+
+                }
 
                 $("[name='my-checkbox']").bootstrapSwitch({
                     size: 'normal',
@@ -285,7 +434,7 @@
 
                 $('#redirectForm').click(function () {
 
-                    window.location = "http://deploy.crm64.ru/createCRM";
+                    window.location = "http://deploy.crm64.ru:8080/createCRM";
                 });
 
                 //stepForm
@@ -338,6 +487,9 @@
                         var password = $('#crmPassword').val();
                         var crmDescription = $('#crmDescription').val();
                         var asteriskAddress = $('#asteriskAddress').val();
+                        var asteriskPort = $('#asteriskPort').val();
+                        $('#httpPort').val(getRandomInt(14000, 14999));
+                        var httpPort = $('#httpPort').val();
                         var asteriskUsername = $('#asteriskLogin').val();
                         var asteriskPassword = $('#asteriskPassword').val();
                         var databaseName = $('#databaseName').val();
@@ -356,8 +508,10 @@
                                 '<tr><th>Описание CRM</th><td>' + crmDescription + '</td></tr>' +
                                 '<tr><th>Активные модули CRM</th><td>' + checkboxes + '</td></tr>' +
                                 '<tr><th>Адрес Asterisk</th><td>' + asteriskAddress + '</td></tr>' +
+                                '<tr><th>Порт Asterisk</th><td>' + asteriskPort + '</td></tr>' +
                                 '<tr><th>Пользователь Asterisk</th><td>' + asteriskUsername + '</td></tr>' +
                                 '<tr><th>Пароль Asterisk</th><td>' + asteriskPassword + '</td></tr>' +
+                                '<tr><th>HTTP Port</th><td>' + httpPort + '</td></tr>' +
                                 '<tr><th>Имя базы данных</th><td>' + databaseName + '</td></tr>' +
                                 '<tr><th>Пользователь базы данных</th><td>' + databaseUsername + '</td></tr>' +
                                 '<tr><th>Пароль базы данных</th><td>' + databasePassword + '</td></tr>' +
@@ -385,7 +539,7 @@
                                 allow_dismiss: false
                             });
                             var delay = 1500;
-                            setTimeout("document.location.href='http://deploy.crm64.ru/'", delay);
+                            setTimeout("document.location.href='http://deploy.crm64.ru:8080/'", delay);
                         });
 
                     }
@@ -412,6 +566,65 @@
 
             });
 
+            function checkModuleVersion(version, plugin_system_name) {
+
+                $.post("/checkVersionModule", {version: version, plugin_system_name: plugin_system_name},
+                function (data) {
+
+                    if (data === "Актуальная версия") {
+                        $('#' + plugin_system_name).append(data);
+                        $('#' + plugin_system_name).attr('class', 'label label-success');
+                    } else {
+                        console.info(data.version);
+                        $('#' + plugin_system_name).append(data.text);
+                        $('#' + plugin_system_name).attr('class', 'label label-warning');
+                        $('#' + plugin_system_name + '_update').append("<button type='button' class='btn btn-warning btn-xs' onclick=startUpdateModuleVersion('" + plugin_system_name + "','" + data.version + "'); return false;>Обновить</button>");
+                    }
+
+                }, 'json');
+
+            }
+
+            function startUpdateModuleVersion(plugin_system_name, version) {
+                var crmDomainName = store.get('crmDomainName');
+
+                $.post("/startUpdateModuleVersion", {
+                    db: store.get('databaseName'),
+                    user: store.get('databaseUsername'),
+                    pass: store.get('databasePassword'),
+                    crmDomainName: crmDomainName,
+                    pluginSystemName: plugin_system_name,
+                    crmVersion: version
+                }, function (data) {
+                    location.reload();
+                });
+            }
+
+            function saveNewUser() {
+                var crmDomainName = store.get('crmDomainName');
+                            
+                var datastring = $("#newUserForm").serialize() + "&db=" + store.get('databaseName') + "&user=" + store.get('databaseUsername') + "&pass=" + store.get('databasePassword') + "";
+
+                $.ajax({
+                    url: "/saveNewUser",
+                    type: "post",
+                    data: datastring,
+                    dataType: 'array',
+                    success: function (d) {
+                        $.bootstrapGrowl("Новый пользователь успешно добавлен", {
+                            type: 'success',
+                            align: 'center',
+                            width: 'auto',
+                            allow_dismiss: false
+                        });
+                        var delay = 1500;
+                        setTimeout("document.location.reload();", delay);
+                    }
+                });
+
+            }
+
+
             function spinner() {
                 $('#myModal .modal-dialog').waitMe({
                     effect: 'win8',
@@ -424,10 +637,16 @@
             function createVHost(vhost, vhostDirectory) {
 
                 $.post("/createVhost", {vhost: vhost, vhostDirectory: vhostDirectory}, function (data) {
-                    return data;
+
+                    $.post("/moveXMLFile", {vhost: vhost}, function () {
+                        console.info(data);
+                    });
                 }, 'json');
             }
 
+            function getRandomInt(min, max) {
+                return Math.floor(Math.random() * (max - min + 1)) + min;
+            }
 
             function viewUser(id) {
 
@@ -468,9 +687,9 @@
                     pass: store.get('databasePassword')},
                 function (data) {
                     console.info(data);
-                    
+
                     $.each(data, function (i, val) {
-                        
+                        $('#myModalEditUserForm #inputHiddenId').val(data[i].id);
                         $('#myModalEditUserForm #inputLogin').val(data[i].username);
                         $('#myModalEditUserForm #inputLastName').val(data[i].last_name);
                         $('#myModalEditUserForm #inputFirstName').val(data[i].first_name);
@@ -479,15 +698,15 @@
                         $('#myModalEditUserForm #inputExternalPhone').val(data[i].external_phone);
                         $('#myModalEditUserForm #inputPhone').val(data[i].phone);
                         $('#myModalEditUserForm #inputEmail').val(data[i].email);
-                        $('#myModalEditUserForm #inputLogin').val(data[i].description);
+                        //$('#myModalEditUserForm #inputRole').val(data[i].description);
 
                     });
                     $('#myModalEditUserForm').modal('show');
                 });
 
             }
-            
-            function deleteUser(id){
+
+            function deleteUser(id) {
                 bootbox.dialog({
                     message: "Вы хотите удалить пользователя?",
                     title: "Удаление пользователя",
@@ -518,13 +737,75 @@
                 });
             }
 
+            function updateUserDetails() {
+                var values = {};
+                var data = $('#editUserDetailForm').serializeArray();
+                console.info(data);
+                $.each($('#editUserDetailForm').serializeArray(), function (i, field) {
+                    values[field.name] = field.value;
+                });
+                console.info(values.inputEmail);
+                $.post("/updateUserDetails", {id: values.inputHiddenId, login: values.inputLogin, last_name: values.inputLastName,
+                    first_name: values.inputFirstName, work_position: values.inputJobPosition, company: values.inputWorkDept,
+                    email: values.inputEmail, phone: values.inputPhone, external_phone: values.inputExternalPhone, group: values.inputRole,
+                    db: store.get('databaseName'),
+                    user: store.get('databaseUsername'),
+                    pass: store.get('databasePassword')}, function (data) {
+
+                    $.bootstrapGrowl("Изменения успешно внесены", {
+                        type: 'success',
+                        align: 'center',
+                        width: 'auto',
+                        allow_dismiss: false
+                    });
+                    var delay = 1500;
+                    setTimeout("document.location.reload();", delay);
+                }, 'json');
+            }
+
+            function updateAsteriskSettings() {
+                var idHidden = $('#idHidden').val();
+                var crmDomainName = $('#crmDomainNameInput').val();
+                var asteriskHost = $('#asteriskHost').val();
+                var asteriskPort = $('#asteriskPort').val();
+                var asteriskUsername = $('#asteriskUsername').val();
+                var asteriskPassword = $('#asteriskPassword').val();
+                var dbHost = $('#dbHost').val();
+                var dbUsername = $('#dbUsername').val();
+                var dbPassword = $('#dbPassword').val();
+                var dbName = $('#dbName').val();
+                var httpPort = $('#httpPort').val();
+
+                $.post("/updateAsteriskSettings", {id: idHidden, asteriskHost: asteriskHost, asteriskPort: asteriskPort,
+                    asteriskUsername: asteriskUsername, asteriskPassword: asteriskPassword, dbHost: dbHost,
+                    dbUsername: dbUsername, dbPassword: dbPassword, dbName: dbName, httpPort: httpPort,
+                    db: store.get('databaseName'),
+                    user: store.get('databaseUsername'),
+                    pass: store.get('databasePassword'),
+                    id_crm: store.get('id'),
+                    crmDomainName: crmDomainName}, function (data) {
+
+                    $.bootstrapGrowl("Изменения успешно внесены", {
+                        type: 'success',
+                        align: 'center',
+                        width: 'auto',
+                        allow_dismiss: false
+                    });
+                    var delay = 1500;
+                    setTimeout("document.location.reload();", delay);
+                }, 'json');
+            }
+
             function setupCRM(id) {
 
                 $.post("/getRowByPrimaryKey", {id: id}, function (data) {
                     console.info(data);
                     $.each(data, function (i, val) {
                         var vhostDomainName = data[i].crmDomainName;
-                        $.post("/createCRMDB", {user: data[i].databaseUsername, pass: data[i].databasePassword, db: data[i].databaseName}, function (data) {
+                        $.post("/createCRMDB", {user: data[i].databaseUsername, pass: data[i].databasePassword, db: data[i].databaseName,
+                            asteriskHost: data[i].asteriskAddress, asteriskPort: data[i].asteriskPort, asteriskUsername: data[i].asteriskLogin,
+                            asteriskPassword: data[i].asteriskPassword, httpPort: data[i].httpPort, crmDomainName: data[i].crmDomainName,
+                            crmUsername: data[i].crmLogin, crmPassword: data[i].crmPassword}, function (data) {
                             console.info(data);
                             if (data === null) {
                                 $.bootstrapGrowl("Структура базы данных создана успешно", {
@@ -578,7 +859,7 @@
 
                     });
                     var delay = 100;
-                    setTimeout("document.location.href='http://deploy.crm64.ru/manageCRM'", delay);
+                    setTimeout("document.location.href='http://deploy.crm64.ru:8080/manageCRM'", delay);
 
                 }, 'json');
 
@@ -586,7 +867,7 @@
             }
 
 
-            function deleteRule(id) {
+            function deleteCRM(id) {
                 bootbox.dialog({
                     message: "Вы действительно хотите удалить CRM?",
                     title: "Удаление CRM",
@@ -595,9 +876,9 @@
                             label: "Да",
                             className: "btn btn-primary",
                             callback: function () {
-                                $.post("/deleteRule", {id: id}, function (data) {
-                                    console.info(data);
-                                    location.reload();
+                                $.post("/deleteCRM", {id: id}, function (data) {
+                                    //console.info(data);
+                                    //location.reload();
                                 });
                             }
                         },
@@ -628,7 +909,7 @@
                 font-size: 13px;
             }
 
-            #tableModuleList{
+            #tableModuleList,#tableNotInstalledModuleList{
                 font-family: 'Ubuntu', sans-serif;
                 font-size: 13px;
             }

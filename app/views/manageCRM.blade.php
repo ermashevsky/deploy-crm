@@ -30,10 +30,21 @@
         <div class="col-xs-12 col-md-10">
             <div id="modulesList" style="width: 90%;">
                 <div class="page-header">
-                    <h4><i class="glyphicon glyphicon-list-alt"></i> Список модулей</h4>
+                    <h4><i class="glyphicon glyphicon-list-alt"></i> Список модулей CRM</h4>
                 </div>
                 <p>
-                    <a href="#">Все</a> | <a href="#">Активные</a> | <a href="#">Не активные</a>
+                <ul class="nav nav-tabs">
+                    <li role="presentation" class="active"><a data-toggle="tab" href="#sectionA">Установленные <span class="label label-primary" id="counter_installed"></span></a></li>
+                    <li role="presentation"><a data-toggle="tab" href="#sectionB">Не установленные <span class="label label-primary" id="counter_not_installed"></span></a></li>
+                </ul>
+                <div class="tab-content">
+                    <div id="sectionA" class="tab-pane fade in active">
+                        <p></p>
+                    </div>
+                    <div id="sectionB" class="tab-pane fade">
+                        <p></p>
+                    </div>
+                </div>
                 </p>
             </div>
         </div>
@@ -42,7 +53,7 @@
                 <li><a href="/"><i class="glyphicon glyphicon-home"> </i> Главная</a></li>
                 <li><a href="/manageCRM"><i class="glyphicon glyphicon-gift"> </i> Список модулей</a></li>
                 <li><a href="/viewUserCRM"><i class="glyphicon glyphicon-user"> </i> Пользователи системы</a></li>
-                <li><a href="#"><i class="glyphicon glyphicon-cog"> </i> Asterisk Listner</a></li>
+                <li><a href="/viewAsteriskSettings"><i class="glyphicon glyphicon-cog"> </i> Asterisk Listner</a></li>
             </ul>
         </div>
     </div>
